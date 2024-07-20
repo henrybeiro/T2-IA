@@ -24,6 +24,8 @@ class ValueIterationAgent(ValueEstimationAgent):
         for a given number of iterations using the supplied
         discount factor.
     """
+
+
     def __init__(self, mdp, discount= 0.9, iterations= 100):
         """
           Your value iteration agent should take an mdp on
@@ -41,45 +43,23 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.discount = discount
         self.iterations = iterations
         self.values = util.Counter()  # A Counter is a dict with default 0
-
-        #print(self.iterations)
-        # print(iterations)
     
-        for k in range(100):
+        for k in range(iterations):
             states = self.mdp.getStates() # seleciona todos os estados
             newStatesValues = util.Counter()
 
             for state in states: # percorre cada estado
                 if not self.mdp.isTerminal(state):   # se não for um estado terminal
-                    # print(state)
+                    
                     actions = self.mdp.getPossibleActions(state) # seleciona todas as ações possiveis deste estado
-                    #print(actions)
                     actionsValues = util.Counter()
 
                     for action in actions:  # percorre cada ação
-                        transitionsAndProbs = self.mdp.getTransitionStatesAndProbs(state, action) # seleciona os pares transição-probabilidade
-                        transitionValues = 0
-                        #print(transitionsAndProbs)
+                        actionsValues[action] = self.getQValue(state,action)
 
-                        for transition in transitionsAndProbs: # percorre cada transição (cim, baixo, esq, dir)
-                            # print(self.mdp.getReward(state, action, transition[0]))
-                            #print(transition)
-                            #print(transition[1])
-                            #print(transition[0])
-                            #print(f"recompensa {self.mdp.getReward(transition[0], action, transition[0])}")
-                            transitionValues += transition[1] * self.mdp.getReward(transition[0], action, transition[0]) * self.discount # calcula os valores 
-                        #print(f'transicao: {transitionValues}')
-                        # print(".")
-                        actionsValues[action] = transitionValues 
-
-                    print(actionsValues)
-                    bestAction = actionsValues.__getitem__(actionsValues.argMax()) # seleciona o valor da ação de maior valor
-                    print(bestAction)
-                    print(self.mdp.getReward(state, action, state))
-                    newStatesValues[state] = bestAction +  self.mdp.getReward(state, action, state) # recompensa imediata
-            
+                    newStatesValues[state] = self.mdp.getReward(state, "", "") + actionsValues.__getitem__(actionsValues.argMax())
+                               
             self.values = newStatesValues.copy()
-            #print(self.values)
   
     def getValue(self, state):
         """
@@ -99,10 +79,9 @@ class ValueIterationAgent(ValueEstimationAgent):
         qValue = 0
 
         for transition in transitionsAndProbs: # percorre cada transição (cim, baixo, esq, dir)
-            qValue += transition[1] * self.values[transition[0]]  # calcula os valores 
+            qValue += transition[1] * self.values[transition[0]] * self.discount   # calcula os valores 
                         
         return qValue
-        #util.raiseNotDefined()
 
     def computeActionFromValues(self, state):
         """
@@ -122,13 +101,7 @@ class ValueIterationAgent(ValueEstimationAgent):
             actionsValues = util.Counter()
 
             for action in actions:  # percorre cada ação
-                transitionsAndProbs = self.mdp.getTransitionStatesAndProbs(state, action) # seleciona os pares transição-probabilidade
-                transitionValues = 0
-
-                for transition in transitionsAndProbs: # percorre cada transição (cim, baixo, esq, dir)
-                    transitionValues += transition[1] * self.values[transition[0]] # calcula os valores 
-                        
-                actionsValues[action] = transitionValues # soma os valores de todas as transições
+                actionsValues[action] = self.getQValue(state,action)
 
             return actionsValues.argMax()
             
