@@ -50,12 +50,15 @@ class ValueIterationAgent(ValueEstimationAgent):
 
             for state in states: # percorre cada estado
                 if not self.mdp.isTerminal(state):   # se não for um estado terminal
-                    
+
                     actions = self.mdp.getPossibleActions(state) # seleciona todas as ações possiveis deste estado
                     actionsValues = util.Counter()
 
                     for action in actions:  # percorre cada ação
-                        actionsValues[action] = self.getQValue(state,action)
+                        if action == 'exit':
+                            actionsValues[action] = 0 # se realizar uma ação que leva a um estado terminal, o q-value é a própria recompensa por estar no estado
+                        else:
+                            actionsValues[action] = self.getQValue(state,action)
 
                     newStatesValues[state] = self.mdp.getReward(state, "", "") + actionsValues.__getitem__(actionsValues.argMax())
                                
@@ -74,12 +77,14 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        # stateValue = self.values[state]
         transitionsAndProbs = self.mdp.getTransitionStatesAndProbs(state, action) # retorna os pares estado-probabilidade em uma lista
         qValue = 0
 
+        if action == 'exit':
+            return self.mdp.getReward(state, "", "")
+
         for transition in transitionsAndProbs: # percorre cada transição (cim, baixo, esq, dir)
-            qValue += transition[1] * self.values[transition[0]] * self.discount   # calcula os valores 
+            qValue += transition[1] * self.values[transition[0]] * self.discount  
                         
         return qValue
 
