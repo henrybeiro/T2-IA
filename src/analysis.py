@@ -21,7 +21,7 @@
 
 def question2():
     answerDiscount = 0.9
-    answerNoise = 0.0
+    answerNoise = 0.0 # setting the chance to move to unintentional states to 0 allows the agent to always follow the optimal policy to cross the bridge
     return answerDiscount, answerNoise
 
 if __name__ == '__main__':
